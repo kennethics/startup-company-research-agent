@@ -1,0 +1,195 @@
+{
+  "name": "Startup Company Research Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b7b3b278-12a5-41ad-896c-ca599fe720f2",
+      "name": "Start Research",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        32,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "<__PLACEHOLDER_VALUE__Enter the startup company name to research__>",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a business research assistant. Your task is to research startup companies and gather specific information.\n\nFor each company, you must find:\n1. Company name (official name)\n2. Email (contact or general inquiry email)\n3. Number of employees (approximate count)\n4. Decision maker (name and title of CEO, founder, or key decision maker)\n5. Industry (primary industry or sector)\n\nUse the Perplexity Search tool to find up-to-date information about the company. Search for the company website, LinkedIn profile, Crunchbase listing, and recent news. Return the data in the exact JSON format specified by the output parser."
+        }
+      },
+      "id": "4c7bedaf-d1d7-4747-addb-d67a8c37c89b",
+      "name": "Company Research Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "c370069d-ce18-4701-94d8-f2d08a7c7b73",
+      "name": "OpenAI GPT-5",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        336
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "5AsvwjEKuSilOHTn",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "query": "<__PLACEHOLDER_VALUE__Company name to research__>",
+        "options": {
+          "maxResults": 5,
+          "searchRecencyFilter": "month"
+        },
+        "requestOptions": {}
+      },
+      "id": "367393b9-d0d2-4460-a460-4918dfc40a40",
+      "name": "Perplexity Search",
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 2,
+      "position": [
+        384,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "companyName": "Example Startup Inc",
+          "email": "contact@example.com",
+          "numberOfEmployees": 50,
+          "decisionMaker": "John Doe - CEO",
+          "industry": "Technology"
+        }
+      },
+      "id": "aa8ca273-c92f-407f-b2a9-78160ff75090",
+      "name": "Company Data Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "id": "ca1c04e3-3ddd-4b8b-a5a8-b020633dae20",
+      "name": "Save to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Dn1mjrHt9smIVAkc",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start Research": {
+      "main": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Company Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Company Data Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6b682480-faa7-400b-9eb3-0570a56721ad",
+  "meta": {
+    "instanceId": "7e1d6661c4c10bc7e723636b58e4de20efce8fb708aac9bab6bdd91dcae8f07d"
+  },
+  "id": "L7KHHpdmprzjnvjE",
+  "tags": []
+}
